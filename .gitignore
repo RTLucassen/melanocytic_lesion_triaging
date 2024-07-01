@@ -1,0 +1,5 @@
+__pycache__
+melanocytic_lesion_triaging_venv
+
+vit256_small_dino.pth
+vit4k_xs_dino.pth
