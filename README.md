@@ -1,7 +1,7 @@
-# Artificial Intelligence-based Triaging of Cutaneous Melanocytic Lesions
+# Artificial Intelligence-Based Triaging of Cutaneous Melanocytic Lesions
 This repository contains all code and trained model parameters to support the paper:  
 
-***"Artificial intelligence-based triaging of cutaneous melanocytic lesions"***  
+***"Artificial Intelligence-Based Triaging of Cutaneous Melanocytic lesions"***  
 
 which is currently under submission.
 
