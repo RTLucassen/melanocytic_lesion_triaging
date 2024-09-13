@@ -3,7 +3,7 @@ This repository contains all code and trained model parameters to support the pa
 
 ***"Artificial Intelligence-Based Triaging of Cutaneous Melanocytic lesions"***  
 
-which is currently under submission.
+which is currently under review.
 
 <div align="center">
   <img width="100%" alt="Method" src=".github\method.png">
