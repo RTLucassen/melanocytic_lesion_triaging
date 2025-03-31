@@ -23,3 +23,18 @@ which may limit the generalizibility of the pipeline to different infrastructure
 - `simulation_study` contains the implementation of the simulation experiment.
 - `start` contains all files to start the preprocessing tasks.
 - `training` contains the implementation of the model training loop.
+
+## Citing
+If you found our work useful in your research, please consider citing our paper:
+```
+@article{lucassen2025artificial,
+  title={Artificial intelligence-based triaging of cutaneous melanocytic lesions},
+  author={Lucassen, Ruben T and Stathonikos, Nikolas and Breimer, Gerben E and Veta, Mitko and Blokx, Willeke A M},
+  journal={npj Biomedical Innovations},
+  volume={2},
+  number={1},
+  pages={10},
+  year={2025},
+  publisher={Nature Publishing Group UK London}
+}
+```
