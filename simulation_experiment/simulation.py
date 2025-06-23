@@ -60,7 +60,7 @@ def baseline(df: pd.DataFrame, pathologists: list[tuple[int, bool]]) -> dict:
     # loop over all cases
     for i in range(len(df)):
         pathologist = pathologists[i % len(pathologists)]
-        case = df_selected.iloc[i]
+        case = df.iloc[i]
         # assign the case to the results
         if case['y_true'] == 0:
             result[pathologist]['negative'] += 1
@@ -72,7 +72,65 @@ def baseline(df: pd.DataFrame, pathologists: list[tuple[int, bool]]) -> dict:
     return result
 
 
-def AI_based_triaging(df: pd.DataFrame, pathologists: list[tuple[int, bool]]) -> dict:
+def baseline_consultation(df: pd.DataFrame, pathologists: list[tuple[int, bool]]) -> dict:
+    """
+    Random case assignment as baseline for the simulation experiment,
+    accounting for consultation and revision cases.
+    
+    Args:
+        df:  Dataframe with predicted probability ('y_pred') 
+            and true label ('y_true') per case.
+        pathologists:  List with 2-tuple per pathologist, indicating the index 
+            and whether the pathologist is an expert.
+
+    Returns:
+        results:  Dictionary with number of high and low complexity cases 
+            assigned to each pathologist using random case assignment.
+    """
+    # initialize dictionary to store the result
+    result = {pathologist: {'positive': 0, 'negative': 0} for pathologist in pathologists}
+    # select all consultation cases
+    df_consultation = df[df['consultation'] == True]
+    # loop over all consultation cases
+    i = 0
+    while i < len(df_consultation):
+        for pathologist in pathologists:
+            if pathologist[1] == True and i < len(df_consultation):
+                case = df_consultation.iloc[i]
+                # assign the case to the results
+                if case['y_true'] == 0:
+                    result[pathologist]['negative'] += 1
+                elif case['y_true'] == 1:
+                    result[pathologist]['positive'] += 1
+                else:
+                    ValueError(f'Unexpected value for `y_true`.')
+                i += 1
+
+    # select all remaining cases
+    df_remaining = df[df['consultation'] == False]
+    i = 0
+    while i < len(df_remaining):
+        least_assigned = min([result[p]['positive']+result[p]['negative'] for p in pathologists])
+        for pathologist in pathologists:
+            assigned = result[pathologist]['positive']+result[pathologist]['negative']
+            if assigned == least_assigned:
+                case = df_remaining.iloc[i]
+                # assign the case to the results
+                if case['y_true'] == 0:
+                    result[pathologist]['negative'] += 1
+                elif case['y_true'] == 1:
+                    result[pathologist]['positive'] += 1
+                else:
+                    ValueError(f'Unexpected value for `y_true`.')
+                i += 1
+
+    return result
+
+
+def AI_based_triaging(
+    df: pd.DataFrame, 
+    pathologists: list[tuple[int, bool]],
+) -> dict:
     """
     AI-based triaging for case assignment in the simulation experiment.
     
@@ -91,8 +149,8 @@ def AI_based_triaging(df: pd.DataFrame, pathologists: list[tuple[int, bool]]) ->
     # sort based on predicted probability
     df = df.sort_values(by=['y_pred_mean'], ascending=False)
     i_top = 0
-    i_bottom = N_cases-1
-    for _ in range(ceil(N_cases/len(pathologists))):
+    i_bottom = len(df)-1
+    for _ in range(ceil(len(df)/len(pathologists))):
         for pathologist in pathologists:
             if i_top <= i_bottom:
                 # check if the pathologist is an expert or not
@@ -113,6 +171,71 @@ def AI_based_triaging(df: pd.DataFrame, pathologists: list[tuple[int, bool]]) ->
     return result
 
 
+def AI_based_triaging_consultation(
+    df: pd.DataFrame, 
+    pathologists: list[tuple[int, bool]],
+) -> dict:
+    """
+    AI-based triaging for case assignment in the simulation experiment,
+    accounting for consultation and revision cases.
+    
+    Args:
+        df:  Dataframe with predicted probability ('y_pred_mean') 
+            and true label ('y_true') per case.
+        pathologists:  List with 2-tuple per pathologist, indicating the index 
+            and whether the pathologist is an expert.
+
+    Returns:
+        results:  Dictionary with number of high and low complexity cases 
+            assigned to each pathologist using AI-based triaging.
+    """
+    # initialize dictionary to store the result
+    result = {pathologist: {'positive': 0, 'negative': 0} for pathologist in pathologists}
+    # select all consultation cases
+    df_consultation = df[df['consultation'] == True]
+    # loop over all consultation cases
+    i = 0
+    while i < len(df_consultation):
+        for pathologist in pathologists:
+            if pathologist[1] == True and i < len(df_consultation):
+                case = df_consultation.iloc[i]
+                # assign the case to the results
+                if case['y_true'] == 0:
+                    result[pathologist]['negative'] += 1
+                elif case['y_true'] == 1:
+                    result[pathologist]['positive'] += 1
+                else:
+                    ValueError(f'Unexpected value for `y_true`.')
+                i += 1
+
+    # select all remaining cases and sort based on predicted probability
+    df_remaining = df[df['consultation'] == False]
+    df_remaining = df_remaining.sort_values(by=['y_pred_mean'], ascending=False)
+    i_top = 0
+    i_bottom = len(df_remaining)-1
+    while i_top <= i_bottom:
+        least_assigned = min([result[p]['positive']+result[p]['negative'] for p in pathologists])
+        for pathologist in pathologists:
+            assigned = result[pathologist]['positive']+result[pathologist]['negative']
+            if assigned == least_assigned and i_top <= i_bottom:
+                # check if the pathologist is an expert or not
+                if pathologist[1] == True:
+                    case = df_remaining.iloc[i_top]
+                    i_top += 1
+                else:
+                    case = df_remaining.iloc[i_bottom]
+                    i_bottom -= 1
+                # assign the case to the result
+                if case['y_true'] == 0:
+                    result[pathologist]['negative'] += 1
+                elif case['y_true'] == 1:
+                    result[pathologist]['positive'] += 1
+                else:
+                    ValueError(f'Unexpected value for `y_true`.')
+    
+    return result
+
+
 # define the path and sheet name
 paths = [
     r"melanocytic_lesion_triaging\selected_models\exp068_ensemble\results_ensemble_test.xlsx",
@@ -120,7 +243,22 @@ paths = [
 ]
 sheet_name = 'Predictions'
 
-# load spreadsheets, separate into positive and negative cases, and save the length
+# define path to consultation status
+consultation_path = r"melanocytic_lesion_triaging\sheets\consultation.xlsx"
+
+# load spreadsheets and add the consultation status, 
+dfs = [pd.read_excel(path, sheet_name=sheet_name) for path in paths]
+df = pd.concat(dfs)
+consultation_df = pd.read_excel(consultation_path)
+
+consultation_status = []
+for i, row in df.iterrows():
+    consultation_status.append(
+        consultation_df[consultation_df['specimen'] == row['specimen']]['consultation'].iloc[0]
+    )
+df['consultation'] = consultation_status
+
+# separate into positive and negative cases, and save the length
 dfs = [pd.read_excel(path, sheet_name=sheet_name) for path in paths]
 df = pd.concat(dfs)
 df_pos = df[df['y_true'] == 1]
@@ -144,7 +282,9 @@ confidence_level = 0.95
 # define methods
 methods = {
     'baseline': baseline, 
+    'baseline excl. consultation': baseline_consultation,
     'AI-based triaging': AI_based_triaging,
+    'AI-based triaging excl. consultation': AI_based_triaging_consultation,
 }
 
 # ASSUMPTIONS:
@@ -266,7 +406,10 @@ if __name__ == '__main__':
                     counts[i] += sample
         referrals[name] = counts
 
-    pairs = [('baseline', 'AI-based triaging')]
+    pairs = [
+        ('baseline', 'AI-based triaging'), 
+        ('baseline excl. consultation', 'AI-based triaging'),
+    ]
     for pair in pairs:
         reduction = [a-b for a, b in zip(referrals[pair[0]], referrals[pair[1]])]
         mean_reduction = np.mean(reduction)
