@@ -5,7 +5,7 @@ This repository contains all code and trained model parameters to support the pa
 
 published in npj biomedical innovations and presented at ECDP 2025.
 
-[[`arXiv`](https://arxiv.org/abs/2410.10509)] [[`npj BI`](https://www.nature.com/articles/s44385-025-00013-1#citeas)] [[`Poster`](https://github.com/RTLucassen/melanocytic_lesion_triaging/blob/main/.github/ECDP_poster.pdf)]
+[[`arXiv`](https://arxiv.org/abs/2410.10509)] [[`npj BI`](https://www.nature.com/articles/s44385-025-00013-1#citeas)] [[`ECDP Poster`](https://github.com/RTLucassen/melanocytic_lesion_triaging/blob/main/.github/ECDP_poster.pdf)]
 
 <div align="center">
   <img width="100%" alt="Method" src=".github\method.png">
