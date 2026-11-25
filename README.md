@@ -1,13 +1,14 @@
+<div align="center">
+  
 # Artificial Intelligence-Based Triaging of Cutaneous Melanocytic Lesions
-This repository contains all code and trained model parameters to support the paper:  
 
-***"Artificial Intelligence-Based Triaging of Cutaneous Melanocytic lesions"***  
+Ruben T. Lucassen, Nikolas Stathonikos, Gerben E. Breimer, Mitko Veta* & Willeke A. M. Blokx*
 
-published in npj biomedical innovations and presented at ECDP 2025.
+*published in npj biomedical innovations and presented at ECDP 2025.*
 
 [[`arXiv`](https://arxiv.org/abs/2410.10509)] [[`npj BI`](https://www.nature.com/articles/s44385-025-00013-1#citeas)] [[`ECDP Poster`](https://github.com/RTLucassen/melanocytic_lesion_triaging/blob/main/.github/ECDP_poster.pdf)]
 
-<div align="center">
+
   <img width="100%" alt="Method" src=".github\method.png">
 </div>
 
